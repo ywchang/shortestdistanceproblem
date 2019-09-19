@@ -5,7 +5,7 @@ public class Route {
     private final String start;
     private final String end;
 
-    public Route(int distance, String start, String end) {
+    public Route(String start, String end, int distance) {
         this.distance = distance;
         this.start = start;
         this.end = end;
