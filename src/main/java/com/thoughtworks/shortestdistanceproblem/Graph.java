@@ -3,7 +3,6 @@ package com.thoughtworks.shortestdistanceproblem;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Graph {
@@ -19,23 +18,22 @@ public class Graph {
     }
 
     public int getShortestDistance(String start, String end) {
-        Optional<Route> routeFound = lookForRoute(start, end);
-        return routeFound.map(Route::getDistance).orElse(0);
+        List<Route> routesAvailable = lookForRoute(start, end);
+        return routesAvailable.stream().mapToInt(Route::getDistance).min().orElse(0);
     }
 
-    private Optional<Route> lookForRoute(String start, String end) {
+    private List<Route> lookForRoute(String start, String end) {
+        List<Route> routesAvailable = new ArrayList<>();
         List<Route> routesMatchingStart = this.routes.stream()
                 .filter(r -> r.getStart().equals(start)).collect(Collectors.toList());
         for (Route route : routesMatchingStart) {
             if (route.getEnd().equals(end)) {
-                return Optional.of(route);
+                routesAvailable.add(route);
             }
-            Optional<Route> downStreamRoute = lookForRoute(route.getEnd(), end);
-            if (downStreamRoute.isPresent()) {
-                return Optional.of(new Route(start, end, route.getDistance() + downStreamRoute.get().getDistance()));
-            }
+            List<Route> downstreamRoutes = lookForRoute(route.getEnd(), end);
+            downstreamRoutes.forEach(dr -> routesAvailable.add(new Route(start, end, route.getDistance() + dr.getDistance())));
         }
-        return Optional.empty();
+        return routesAvailable;
     }
 
 }
